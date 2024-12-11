@@ -3358,3 +3358,43 @@ public:
 	float startMessageTime{ 2.0f };
 	float startMessageTimer{ 0.0f };
 };
+
+#version 460 core
+
+out vec4 FragColor;
+
+in vec4 vVertexColor;
+in vec2 vTexturePosition;
+flat in int vTextureIndex;
+
+uniform sampler2DArray uTextures;
+
+void main() {
+	vec3 texCoords = vec3(vTexturePosition, vTextureIndex); // Encode TexIndex as the z-coordinate
+    FragColor = texture(uTextures, texCoords) * vVertexColor;
+}
+
+#version 460 core
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec4 vertexColor;
+layout(location = 2) in vec2 texturePosition;
+layout(location = 3) in int textureIndex;
+
+out vec4 vVertexColor;
+out highp vec2 vTexturePosition;
+flat out int vTextureIndex;
+
+
+uniform mat4 uModelMatrix;
+uniform mat4 uProjectionMatrix;
+
+void main() {
+
+	vVertexColor = vertexColor;
+	vTexturePosition = texturePosition;
+	vTextureIndex = textureIndex;
+
+	vec4 newPosition = uProjectionMatrix * uModelMatrix * vec4(position, 0.0f, 1.0f);
+	gl_Position = vec4(newPosition.x, newPosition.y, newPosition.z, newPosition.w);
+	
+}
